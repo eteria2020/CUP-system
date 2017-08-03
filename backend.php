@@ -167,7 +167,7 @@ function getDriverLicenseValidation() {
 	$response = curl_exec($curl);
 	$responseInfo = curl_getinfo($curl);
 	curl_close($curl);
-	$data = $response;
+	$data = $responseInfo;
 	return $data;
 }
 
