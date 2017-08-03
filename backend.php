@@ -152,6 +152,33 @@ function getPM2info() {
     }
     return $data;
 }
+function getDriverLicenseValidation() {
+	$data = array("running" => false);
+	
+	$curl = curl_init();
+	$optArray = array(
+		CURLOPT_URL => 'http://95.110.203.186:8080/test/vpn_status.php',
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_HEADER => true
+	);
+	
+	curl_setopt_array($curl, $optArray);
+	
+	//curl_setopt($curl, CURLOPT_URL, "http://95.110.203.186:8080/test/vpn_status.php");
+	$response = curl_exec($curl);
+	$responseInfo = curl_getinfo($curl);
+	$headerSize = $responseInfo['header_size'];
+	$body = substr($response, $headerSize);
+	
+	curl_close($curl);
+	
+	if (substr($body, -9)==="Connected") {
+		$data = array("running" => true);
+	}
+	
+	
+	return $data;
+}
 
 function checkProcess($process) {
     exec("/bin/pidof \"$process\"",$response);
@@ -257,6 +284,8 @@ if ($cache!=NULL) {
   $result->mongodb = checkProcess('mongod');
   $result->pm2 = checkProcess('PM2 v1.1.2: God Daemon');
   $result->pm2['jobs']=getPM2info();
+  $result->dlv=getDriverLicenseValidation();
+  
 
   $dbh = getDb();
   $result->db = new stdClass();
