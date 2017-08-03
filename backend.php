@@ -172,10 +172,10 @@ function getDriverLicenseValidation() {
 	
 	curl_close($curl);
 	
-	//if ($body==="\ufeffConnected") {
-	//	$data = array("running" => true);
-	//}
-	$data = substr($body, -9);  //Connected
+	if (substr($body, -9)==="Connected") {
+		$data = array("running" => true);
+	}
+	
 	
 	return $data;
 }
