@@ -175,7 +175,7 @@ function getDriverLicenseValidation() {
 	//if ($body==="\ufeffConnected") {
 	//	$data = array("running" => true);
 	//}
-	$data = $body;
+	$data = substr($body, -9);  //Connected
 	
 	return $data;
 }
