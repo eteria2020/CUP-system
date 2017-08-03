@@ -153,7 +153,7 @@ function getPM2info() {
     return $data;
 }
 function getDriverLicenseValidation() {
-	$data = array();
+	$data = array("running" => false);
 	
 	$curl = curl_init();
 	$optArray = array(
@@ -172,7 +172,11 @@ function getDriverLicenseValidation() {
 	$body = substr($response, $headerSize);
 	
 	curl_close($curl);
-	$data = $body;
+	
+	if ($body==="\ufeffConnected") {
+		$data = array("running" => true);
+	}
+	
 	return $data;
 }
 
