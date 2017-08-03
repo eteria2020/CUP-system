@@ -154,12 +154,20 @@ function getPM2info() {
 }
 function getDriverLicenseValidation() {
 	$data = array();
+	
 	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, "http://95.110.203.186:8080/test/vpn_status.php");
-	$result = curl_exec($curl);
+	$optArray = array(
+		CURLOPT_URL => 'http://95.110.203.186:8080/test/vpn_status.php',
+		CURLOPT_RETURNTRANSFER => true
+	);
+	
+	curl_setopt_array($curl, $optArray);
+	
+	//curl_setopt($curl, CURLOPT_URL, "http://95.110.203.186:8080/test/vpn_status.php");
+	$response = curl_exec($curl);
 	$responseInfo = curl_getinfo($curl);
 	curl_close($curl);
-	$data = $responseInfo;
+	$data = $response;
 	return $data;
 }
 
