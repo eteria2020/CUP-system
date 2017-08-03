@@ -1,0 +1,9 @@
+AuthType Basic
+AuthName "Sharengo"
+AuthUserFile /etc/apache2/htpasswd-ui
+
+Options -Indexes
+
+<Limit GET POST>
+	require valid-user
+</Limit>

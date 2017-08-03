@@ -1,0 +1,631 @@
+
+<!doctype html>
+<html><head>
+    <meta charset="utf-8">
+    <title>Car sharing platform dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Car sharing system control panel">
+    <meta name="author" content="PhilCar">
+
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/font-style.css" rel="stylesheet">
+    <link href="css/flexslider.css" rel="stylesheet">
+    <link href="css/leds.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+        
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jquery.peity.min.js"></script>
+    <script type="text/javascript" src="js/moment-with-locales.js"></script>
+
+    <script type="text/javascript" src="js/flot/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.pie.min.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.categories.min.js"></script>
+    <script type="text/javascript" src="js/flot/jquery.flot.stack.min.js"></script>
+
+	<script type="text/javascript" src="js/blocks/lineandbars.js"></script>
+
+	<script type="text/javascript" src="js/blocks/dash-charts.js"></script>
+	<script type="text/javascript" src="js/blocks/gauge.js"></script>
+
+	<!-- NOTY JAVASCRIPT -->
+	<script type="text/javascript" src="js/noty/jquery.noty.js"></script>
+	<script type="text/javascript" src="js/noty/top.js"></script>
+	<script type="text/javascript" src="js/noty/topLeft.js"></script>
+	<script type="text/javascript" src="js/noty/topRight.js"></script>
+	<script type="text/javascript" src="js/noty/topCenter.js"></script>
+
+	<!-- You can add more layouts if you want -->
+	<script type="text/javascript" src="js/noty/themes/default.js"></script>
+    <!-- <script type="text/javascript" src="assets/js/dash-noty.js"></script> This is a Noty bubble when you init the theme-->
+
+
+
+	<script type="text/javascript" src="js/jquery.flexslider.js"></script>
+    <script type="text/javascript" src="js/blocks/admin.js"></script>
+
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+      }
+
+      hr {
+        margin-bottom: 5px;
+      }
+
+      div.center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      span.value {
+          color:#6AC8CC;
+      }
+
+      table.valuebox {
+       background-color: #666;
+       margin-top: 10px;
+       margin-bottom: 5px;
+      }
+
+      table.valuebox td {
+       border-right: thick solid #3d3d3d;
+       border-left: thick solid #3d3d3d
+      }
+
+
+    </style>
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+   
+
+  	<!-- Google Fonts call. Font Used Open Sans & Raleway -->
+	<link href="http://fonts.googleapis.com/css?family=Raleway:400,300" rel="stylesheet" type="text/css">
+  	<link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+    });
+
+    var chartSystemDisk;
+    var chartDataDisk;
+    var barsSystemLoad;
+    var pieCars;
+
+    $(window).load(function () {
+
+        chartSystemDisk = new gauge("chartSystemDisk");
+        chartDataDisk = new gauge("chartDataDisk");
+        barsSystemLoad= $("#loadbars").peity("bar");
+
+        //updtePieCars([]);
+
+        update();
+        setInterval(update,5000);
+    });
+
+    function setLed(id,state) {
+       var classname='';
+       switch(state) {
+         case 0:
+         case false:
+            classname='led-red';
+            break;
+
+         case 1:
+         case true:
+            classname='led-green';
+            break;
+
+         case 2:
+            classname='led-yellow';
+            break;
+
+         case 3:
+            classname='led-blue';
+            break;
+
+         default:
+            classname='led-gray';
+            break;
+
+       }
+
+       $(id).attr('class',classname);
+
+    }
+
+    function updtePieCars(element, data) {
+
+       function labelFormatter(label, series) {
+		return "<div style='font-size:8pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.data[0][1]) + "</div>";
+	   }
+
+        var div = $(element);
+        div.unbind();
+        $.plot(div,data, {
+          series : {
+           pie: {
+             show: true ,
+             radius: 1,
+             label : {
+               show: true,
+               radius: 2/3,
+               formatter: labelFormatter,
+               threshold: 0.01
+             }
+           }
+          },
+          legend: {
+            show: false
+          }
+        });
+    }
+
+        function updtePieReservations(data) {
+
+       function labelFormatter(label, series) {
+		return "<div style='font-size:8pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.data[0][1]) + "</div>";
+	   }
+
+        var div = $("#pieReservations");
+        div.unbind();
+        $.plot(div,data, {
+          series : {
+           pie: {
+             show: true ,
+             radius: 1,
+             label : {
+               show: true,
+               radius: 2/3,
+               formatter: labelFormatter,
+               threshold: 0.01
+             }
+           }
+          },
+          legend: {
+            show: false
+          }
+        });
+    }
+
+    function updateTripsChart(real,service,open,ylist) {
+
+
+        var line_opt = {
+          show: true,
+          linewidth:2,
+          color: "#555"
+        };
+
+        var bars_opt = {
+          show: true,
+	  	  barWidth: 0.5,
+          fill: 1,
+		  align: "center",hoverable: true
+        }
+
+        var ldata = [
+        { data: real, label: "Real" , color: "#0F0", bars: bars_opt }, /*
+        { data: service, label: "Service" , color: "#455EFF", bars: bars_opt },*/
+        { data: open, label: "Open" , color: "#FF2C20", bars: bars_opt },
+        { data: ylist, label: "yesterday" , color: "#AAA", stack:false , lines: line_opt , bars: {show: false}}
+        ];
+
+
+		$.plot("#barTrips",  ldata , {
+			series: {
+				bars: {
+					show: true,
+					barWidth: 0.5,
+                    fill: 0.9,
+					align: "center"
+				},
+                stack: true
+			},
+			xaxis: {
+              autoscaleMargin: 0,
+              ticks : [3,6,9,12,15,18,21,24]
+
+			},
+            grid: {
+              color : "#F0F0F0",
+              hoverable: true,
+              backgroundColor: { colors: ["#999", "#444"] }
+            },
+            legend: {
+            show: false
+            }
+
+		});
+
+        $(".tickLabel").css('color','#92C1CC');
+    }
+
+    function update() {
+        $.ajax({
+          dataType: "json",
+          url: "http://core.sharengo.it/system/backend.php",
+          success : function(data) {
+            console.log(data);
+            chartSystemDisk.draw(100-data.system.root.fill);
+            s = Math.round(data.system.root.size/1073741824);
+            $("#systemDiskSize").text(""+ s + " GB");
+            s = Math.round(data.system.root.free/1073741824);
+            $("#systemDiskFree").text(""+ s + " GB");
+
+            chartDataDisk.draw(100-data.system.data.fill);
+
+            s = Math.round(data.system.data.size/1073741824);
+            $("#dataDiskSize").text(""+ s + " GB");
+            s = Math.round(data.system.data.free/1073741824);
+            $("#dataDiskFree").text(""+ s + " GB");
+
+            setLed('#ledPostgres',data.postgres.running);
+            setLed('#ledRedisServer',data.redis_server.running);
+            setLed('#ledRedisSentinel',data.redis_sentinel.running);
+            setLed('#ledMongo',data.mongodb.running);
+            setLed('#ledPgpool2',data.pgpool.running);
+            setLed('#ledRedisSentinel',data.redis_sentinel.running);
+            setLed('#ledPm2',data.pm2.running);
+
+            setLed('#ledWebServices',data.pm2.jobs.webservices.status=='online');
+            setLed('#ledBeaconServer',data.pm2.jobs.BeaconServer.status=='online');
+            //setLed('#ledBeaconWorker',false);
+            setLed('#ledMqRouter',data.pm2.jobs.MqRouter.status=='online');
+            setLed('#ledMqNotifier',data.pm2.jobs.MqNotifier.status=='online');
+
+            $('#pidsPostgres').text(""+data.postgres.pids);
+            $('#pidsPgpool2').text(""+data.pgpool.pids);
+            $('#pidsMongo').text(""+data.mongodb.pids);
+
+            $('#memWebServices').text((data.pm2.jobs.webservices.memory/1048576).toFixed(2) + " MB");
+            $('#memBeaconServer').text((data.pm2.jobs.BeaconServer.memory/1048576).toFixed(2) + " MB");
+            $('#memMqRouter').text((data.pm2.jobs.MqRouter.memory/1048576).toFixed(2) + " MB");
+            $('#memMqNotifier').text((data.pm2.jobs.MqNotifier.memory/1048576).toFixed(2) + " MB");
+
+            serverTimestamp = moment.unix(data.system.timestamp);
+            $("#serverTime").text(serverTimestamp.format("HH:mm:ss"));
+
+            localTime = moment();
+            $("#localTime").text(localTime.format("HH:mm:ss"));
+
+
+            $("#serverUptime").text(data.system.uptime.formatted);
+            $("#systemLoad").text(data.system.load.m1);
+
+            var values = barsSystemLoad.text().split(",");
+            for(var i=0;i<values.length;i++)
+                values[i] = parseFloat(values[i]);
+            if (isNaN(values[0])) values = [];
+            if (values.length>10) values.shift();
+            values.push(parseFloat(data.system.load.m1));
+            barsSystemLoad.text(values.join(",")).change();
+
+            $("#numTrips").text(""+data.db.trips);
+            $("#numOpenTrips").text(""+data.db.opentrips);
+            $("#numLastHourTrips").text(""+data.db.trips_last_hour);
+            $("#numFromMidninghtTrips").text(""+data.db.trips_from_midnight);
+            $("#numReservations").text(""+data.db.reservations);
+
+            $("#numTripslte10m").text(""+data.db.trips_distribution.lte10m);
+            $("#numTripslte1h").text(""+data.db.trips_distribution.lte1h);
+            $("#numTripslte8h").text(""+data.db.trips_distribution.lte8h);
+            $("#numTripslte1d").text(""+data.db.trips_distribution.lte1d);
+            $("#numTripsgt1d").text(""+data.db.trips_distribution.gt1d);
+
+			// Milano
+            var pieCarData = [
+                { label: "maintenance" , data: data.db.cars_mi.maintenance },
+                { label: "operative" ,   data: data.db.cars_mi.operative },
+                { label: "out of order" , data: data.db.cars_mi.out_of_order }
+            ];
+            updtePieCars("#pieCarsMi",pieCarData);
+            var tot = data.db.cars_mi.maintenance + data.db.cars_mi.operative + data.db.cars_mi.out_of_order;
+            $("#totalCarsMi").text("" + tot);
+
+			// Firenze
+            var pieCarData = [
+                { label: "maintenance" , data: data.db.cars_fi.maintenance },
+                { label: "operative" ,   data: data.db.cars_fi.operative },
+                { label: "out of order" , data: data.db.cars_fi.out_of_order }
+            ];
+            updtePieCars("#pieCarsFi",pieCarData);
+            var tot = (data.db.cars_fi.maintenance || 0) + (data.db.cars_fi.operative || 0) + (data.db.cars_fi.out_of_order || 0);
+            $("#totalCarsFi").text("" + tot);
+            
+            // Roma
+            var pieCarData = [
+                { label: "maintenance" , data: data.db.cars_rm.maintenance },
+                { label: "operative" ,   data: data.db.cars_rm.operative },
+                { label: "out of order" , data: data.db.cars_rm.out_of_order }
+            ];
+            updtePieCars("#pieCarsRm",pieCarData);
+            var tot = (data.db.cars_rm.maintenance || 0) + (data.db.cars_rm.operative || 0) + (data.db.cars_rm.out_of_order || 0);
+            $("#totalCarsRm").text("" + tot);
+
+            // Modena
+            var pieCarData = [
+                { label: "maintenance" , data: data.db.cars_mo.maintenance },
+                { label: "operative" ,   data: data.db.cars_mo.operative },
+                { label: "out of order" , data: data.db.cars_mo.out_of_order }
+            ];
+            updtePieCars("#pieCarsMo",pieCarData);
+            var tot = (data.db.cars_mo.maintenance || 0) + (data.db.cars_mo.operative || 0) + (data.db.cars_mo.out_of_order || 0);
+            $("#totalCarsMo").text("" + tot);
+
+            updateTripsChart(data.db.trips_day,
+                             data.db.trips_service_day,
+                             data.db.trips_open_day,
+                             data.db.trips_yesterday);
+
+            var pieReservationsData = [
+                { label: "cancelled" , data: data.db.reservations_count["DELETED"] },
+                { label: "used" , data: data.db.reservations_count["USED"] },
+                { label: "expired" ,   data: data.db.reservations_count["EXPIRED"] }
+
+            ];
+            updtePieReservations(pieReservationsData);
+          }
+        })
+
+    }
+
+</script>    
+  </head>
+  <body>
+
+  	<!-- NAVIGATION MENU -->
+
+    <div class="navbar-nav navbar-inverse navbar-fixed-top">
+        <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">Car sharing platform dashboard</a>
+        </div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="system.html"><i class="icon-home icon-white"></i>Overview</a></li>
+              <li><a href="#"><i class="icon-th icon-white"></i>Server1</a></li>
+              <li><a href="#"><i class="icon-lock icon-white"></i>Server2</a></li>
+              <li><a href="#"><i class="icon-user icon-white"></i>Server3</a></li>
+
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+    </div>
+
+    <div class="container">
+
+	  <!-- FIRST ROW OF BLOCKS -->
+      <div class="row">
+
+      <!-- Services block -->
+        <div class="col-sm-3 col-lg-3">
+      		<div class="dash-unit">
+	      		<dtitle>Services status</dtitle>
+	      		<hr>
+                  <div style="">
+                  <table >
+                  <tr><td style="padding: 10px"><div id="ledPostgres" class="led-gray"></div></td><td>PostgreSQL  (<span id='pidsPostgres' style="color:#3FCCCC;">-</span>)</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledPgpool2" class="led-gray"></div></td><td>PgPool2   (<span id='pidsPgpool2' style="color:#3FCCCC;">-</span>)</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledMongo" class="led-gray"></div></td><td>MongoDB   (<span id='pidsMongo' style="color:#3FCCCC;">-</span>)</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledRedisServer" class="led-gray"></div></td><td>Redis-Server</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledRedisSentinel" class="led-gray"></div></td><td>Redis-Sentinel</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a href="http://core.sharengo.it:9000/">PM2</a></td></tr>
+                  </table>
+                  </div>
+            </div>
+        </div>
+
+        <div class="col-sm-3 col-lg-3">
+      		<div class="dash-unit">
+	      		<dtitle>PM2 node.js services</dtitle>
+	      		<hr>
+                  <div style="">
+                  <table >
+                  <tr><td style="padding: 10px"><div id="ledWebServices" class="led-gray"></div></td><td>WebServices</td><td><span id='memWebServices' style="color:#3FCCCC;">-</span></td></tr>
+                  <tr><td style="padding: 10px"><div id="ledBeaconServer" class="led-gray"></div></td><td>BeaconServer</td><td>   <span id='memBeaconServer' style="color:#3FCCCC;">-</span></td></tr>
+                  <tr><td style="padding: 10px"><div id="ledBeaconWorker" class="led-gray"></div></td><td>BeaconWorker</td><td>  <span id='memBeaconWorker' style="color:#3FCCCC;">-</span></td></tr>
+                  <tr><td style="padding: 10px"><div id="ledMqRouter" class="led-gray"></div></td><td>MqRouter</td><td> <span id='memMqRouter' style="color:#3FCCCC;">-</span></td></tr>
+                  <tr><td style="padding: 10px"><div id="ledMqNotifier" class="led-gray"></div></td><td>MqNotifier</td><td> <span id='memMqNotifier' style="color:#3FCCCC;">-</span></td></tr>
+                  </table>
+                  </div>
+            </div>
+        </div>
+
+
+	  <!-- System disk block -->
+		<div class="col-sm-3 col-lg-3">
+			<div class="dash-unit">
+	      		<dtitle>System disk space  (/)</dtitle>
+	      		<hr>
+                <div class="center" style="  width: 100%;  text-align: center;" >
+				<canvas id="chartSystemDisk" width="150" height="150"> </canvas>
+                <BR><BR><BR>
+                Size : <span id="systemDiskSize" class="value"></span> - Free : <span id="systemDiskFree" class="value"></span>
+                </div>
+            </div>
+		</div>
+
+	  <!-- System disk block -->
+		<div class="col-sm-3 col-lg-3">
+			<div class="dash-unit">
+	      		<dtitle>Data disk space   (/var)</dtitle>
+	      		<hr>
+                <div class="center" style="  width: 100%;  text-align: center;" >
+				<canvas id="chartDataDisk" width="150" height="150"> </canvas>
+                <BR><BR><BR>
+                Size : <span id="dataDiskSize" class="value"></span> - Free : <span id="dataDiskFree" class="value"></span>
+                </div>
+            </div>
+		</div>
+
+
+      </div><!-- /row -->
+      
+      
+	  <!-- SECOND ROW OF BLOCKS -->
+      <div class="row">
+
+          <div class="col-sm-3 col-lg-3">
+
+      <!-- LOCAL TIME BLOCK -->
+      		<div class="half-unit">
+	      		<dtitle>Time</dtitle>
+	      		<hr>
+		      		<div class=" width: 100%;  text-align: center;margin-top:0px">
+                        <table  width=100% class="valuebox"><tr>
+                        <td style=" text-align: center;">
+                        <h5>Server Time</h5>
+			      		<h2><span id='serverTime' class="value">--:--:--</span></h2>
+                        </td><td style=" text-align: center;">
+                        <h5>Client Time</h5>
+			      		<h2><span id='localTime' class="value">--:--:--</span></h2>
+                        </td>
+                        </tr>
+                        </table>
+		      		</div>
+			</div>
+
+      <!-- SERVER UPTIME -->
+			<div class="half-unit">
+	      		<dtitle>Server Uptime</dtitle>
+	      		<hr>
+	      		<div class="cont">
+					<p><H2><span id="serverUptime"></span></H2></p>
+                    <p><H4>Load <span id="systemLoad" class="value"></span>  <span id="loadbars" ></span></H4></p>
+				</div>
+			</div>
+
+        </div>
+
+        <div class="col-sm-3 col-lg-3">
+      		<div class="dash-unit">
+	      		<dtitle>Trips</dtitle>
+	      		<hr>
+	      		<div class="cont" style="margin-top:0px">
+                <table width='100%' class="valuebox"><tr>
+                <td  width='33%'><h5>Currently open</h5></td>
+                <td  width='33%'><h5>Last hour</h5></td>
+                <td  width='33%'><h5>From midnight</h5></td>
+                </tr><tr>
+                <td ><span id="numOpenTrips" class="value">-</span></td>
+                <td><span id="numLastHourTrips" class="value">-</span></td>
+                <td><span id="numFromMidninghtTrips" class="value">-</span></td>
+                </tr>
+                </table>
+                <div id="barTrips" style="height: 190px"></div>
+
+
+	      		</div>
+      		</div>
+
+		</div>
+
+        <div class="col-sm-3 col-lg-3">
+            <div class="dash-unit">
+	      		<dtitle>Reservations</dtitle>
+	      		<hr>
+	      		<div class="">
+      			<p><bold><span id="numReservations" class="value">-</span> Reservations</bold></p>
+                <p><span id="numTrips" class="value">-</span> Total DB Trips</p>
+
+                <table width='100%' class="valuebox"><tr>
+                <td></td><td><10m</td><td><1h</td><td><8h</td><td><1d</td><td>>1d</td></tr>
+                <tr>
+                <td>Open trips</td>
+                <td><span id="numTripslte10m" class="value">-</span></td>
+                <td><span id="numTripslte1h" class="value">-</span></td>
+                <td><span id="numTripslte8h" class="value">-</span></td>
+                <td><span id="numTripslte1d" class="value">-</span></td>
+                <td><span id="numTripsgt1d" class="value">-</span></td>
+                </tr>
+                </table>
+	      		</div>
+      		</div>
+        </div>
+
+        <div class="col-sm-3 col-lg-3">
+      	    <div class="dash-unit">
+	      		<dtitle>Reservations</dtitle>
+	      		<hr>
+                <div class="center" style="  width: 100%;  text-align: center;" > Reservation esit - last 24 hours</div><br>
+                <div id="pieReservations" style="height: 160px"></div><br>
+                <div class="center" style="  width: 100%;  text-align: center;" > Total (last 24 hours)<span id='totalReservations' class="value">-</span> </div>
+                <p><span id="numReservations" class="value">-</span> Reservations</p>
+      		</div>
+        </div>
+
+
+      </div><!-- /row -->
+
+      <div class="row">
+
+        <div class="col-sm-3 col-lg-3">
+      	    <div class="dash-unit">
+	      		<dtitle>Car status split - Milano</dtitle>
+	      		<hr>
+                <div id="pieCarsMi" style="height: 201px"></div><br>
+                <div class="center" style="  width: 100%;  text-align: center;" > Total <span id='totalCarsMi' class="value">-</span> Cars</div>
+      		</div>
+        </div>
+
+        <div class="col-sm-3 col-lg-3">
+      	    <div class="dash-unit">
+	      		<dtitle>Car status split - Firenze</dtitle>
+	      		<hr>
+                <div id="pieCarsFi" style="height: 201px"></div><br>
+                <div class="center" style="  width: 100%;  text-align: center;" > Total <span id='totalCarsFi' class="value">-</span> Cars</div>
+      		</div>
+        </div>
+        
+        <div class="col-sm-3 col-lg-3">
+      	    <div class="dash-unit">
+	      		<dtitle>Car status split - Roma</dtitle>
+	      		<hr>
+                <div id="pieCarsRm" style="height: 201px"></div><br>
+                <div class="center" style="  width: 100%;  text-align: center;" > Total <span id='totalCarsRm' class="value">-</span> Cars</div>
+      		</div>
+        </div>
+
+        <div class="col-sm-3 col-lg-3">
+      	    <div class="dash-unit">
+	      		<dtitle>Car status split - Modena</dtitle>
+	      		<hr>
+                <div id="pieCarsMo" style="height: 201px"></div><br>
+                <div class="center" style="  width: 100%;  text-align: center;" > Total <span id='totalCarsMo' class="value">-</span> Cars</div>
+      		</div>
+        </div>
+
+         <div class="col-sm-3 col-lg-3"> </div>
+      </div>
+
+
+
+      
+	</div> <!-- /container -->
+	<div id="footerwrap">
+      	<footer class="clearfix"></footer>
+      	<div class="container">
+      		<div class="row">
+      			<div class="col-sm-12 col-lg-12">
+      			<p>Philcar - Copyright 2015</p>
+      			</div>
+
+      		</div><!-- /row -->
+      	</div><!-- /container -->
+	</div><!-- /footerwrap -->
+
+</body></html>
