@@ -154,8 +154,8 @@ function getPM2info() {
 }
 function getDriverLicenseValidation() {
 	$data = array();
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, "http://www.example.com/tester.phtml");
+	$curl = curl_init();
+	curl_setopt($curl, CURLOPT_URL, "http://95.110.203.186:8080/test/vpn_status.php");
 	$result = curl_exec($curl);
 	curl_close($curl);
 	$data = $result;
