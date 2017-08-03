@@ -275,6 +275,7 @@
             setLed('#ledPgpool2',data.pgpool.running);
             setLed('#ledRedisSentinel',data.redis_sentinel.running);
             setLed('#ledPm2',data.pm2.running);
+			setLed('#ledDlv',data.dlv);
 
             setLed('#ledWebServices',data.pm2.jobs.webservices.status=='online');
             setLed('#ledBeaconServer',data.pm2.jobs.BeaconServer.status=='online');
@@ -424,6 +425,7 @@
                   <tr><td style="padding: 10px"><div id="ledRedisServer" class="led-gray"></div></td><td>Redis-Server</td></tr>
                   <tr><td style="padding: 10px"><div id="ledRedisSentinel" class="led-gray"></div></td><td>Redis-Sentinel</td></tr>
                   <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a href="http://core.sharengo.it:9000/">PM2</a></td></tr>
+				  <tr><td style="padding: 10px"><div id="ledDlv" class="led-gray"></div></td><td><a href="http://license.sharengo.it:8080/check_patente.htm">Driver license</a></td></tr>
                   </table>
                   </div>
             </div>

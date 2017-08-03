@@ -152,6 +152,15 @@ function getPM2info() {
     }
     return $data;
 }
+function getDriverLicenseValidation() {
+	$data = array();
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, "http://www.example.com/tester.phtml");
+	$result = curl_exec($curl);
+	curl_close($curl);
+	$data = $result;
+	return $data;
+}
 
 function checkProcess($process) {
     exec("/bin/pidof \"$process\"",$response);
@@ -257,6 +266,8 @@ if ($cache!=NULL) {
   $result->mongodb = checkProcess('mongod');
   $result->pm2 = checkProcess('PM2 v1.1.2: God Daemon');
   $result->pm2['jobs']=getPM2info();
+  $result->dlv=getDriverLicenseValidation();
+  
 
   $dbh = getDb();
   $result->db = new stdClass();
