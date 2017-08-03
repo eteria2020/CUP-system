@@ -157,8 +157,9 @@ function getDriverLicenseValidation() {
 	$curl = curl_init();
 	curl_setopt($curl, CURLOPT_URL, "http://95.110.203.186:8080/test/vpn_status.php");
 	$result = curl_exec($curl);
+	$responseInfo = curl_getinfo($curl);
 	curl_close($curl);
-	$data = $result;
+	$data = $responseInfo;
 	return $data;
 }
 
