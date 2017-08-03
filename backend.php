@@ -159,7 +159,6 @@ function getDriverLicenseValidation() {
 	$optArray = array(
 		CURLOPT_URL => 'http://95.110.203.186:8080/test/vpn_status.php',
 		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_VERBOSE => true,
 		CURLOPT_HEADER => true
 	);
 	
@@ -173,9 +172,10 @@ function getDriverLicenseValidation() {
 	
 	curl_close($curl);
 	
-	if ($body==="\ufeffConnected") {
-		$data = array("running" => true);
-	}
+	//if ($body==="\ufeffConnected") {
+	//	$data = array("running" => true);
+	//}
+	$data = $body;
 	
 	return $data;
 }
