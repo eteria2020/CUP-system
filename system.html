@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html><head>
     <meta charset="utf-8">
@@ -108,7 +107,7 @@
         //updtePieCars([]);
 
         update();
-        setInterval(update,5000);
+        setInterval(update,60000);
     });
 
     function setLed(id,state) {
@@ -169,11 +168,11 @@
         });
     }
 
-        function updtePieReservations(data) {
+	function updtePieReservations(data) {
 
-       function labelFormatter(label, series) {
-		return "<div style='font-size:8pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.data[0][1]) + "</div>";
-	   }
+		function labelFormatter(label, series) {
+			return "<div style='font-size:8pt; text-align:center; padding:2px; color:black;'>" + label + "<br/>" + Math.round(series.data[0][1]) + "</div>";
+		}
 
         var div = $("#pieReservations");
         div.unbind();
@@ -276,12 +275,15 @@
             setLed('#ledRedisSentinel',data.redis_sentinel.running);
             setLed('#ledPm2',data.pm2.running);
 			setLed('#ledDlv',data.dlv.running);
+			setLed('#ledApache2',data.apache.running);
 
             setLed('#ledWebServices',data.pm2.jobs.webservices.status=='online');
             setLed('#ledBeaconServer',data.pm2.jobs.BeaconServer.status=='online');
             //setLed('#ledBeaconWorker',false);
             setLed('#ledMqRouter',data.pm2.jobs.MqRouter.status=='online');
             setLed('#ledMqNotifier',data.pm2.jobs.MqNotifier.status=='online');
+
+			$('#connApache').text(""+data.apache.connections);
 
             $('#pidsPostgres').text(""+data.postgres.pids);
             $('#pidsPgpool2').text(""+data.pgpool.pids);
@@ -426,6 +428,7 @@
                   <tr><td style="padding: 10px"><div id="ledRedisSentinel" class="led-gray"></div></td><td>Redis-Sentinel</td></tr>
                   <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a href="http://core.sharengo.it:9000/">PM2</a></td></tr>
 				  <tr><td style="padding: 10px"><div id="ledDlv" class="led-gray"></div></td><td><a href="http://license.sharengo.it:8080/check_patente.htm">Driver license</a></td></tr>
+				  <tr><td style="padding: 10px"><div id="ledApache2" class="led-gray"></div></td><td>Apache2 (<span id='connApache' style="color:#3FCCCC;">-</span>)</td></tr>
                   </table>
                   </div>
             </div>
@@ -623,7 +626,7 @@
       	<div class="container">
       		<div class="row">
       			<div class="col-sm-12 col-lg-12">
-      			<p>Philcar - Copyright 2015</p>
+      			<p>Sharengo - Copyright 2018</p>
       			</div>
 
       		</div><!-- /row -->

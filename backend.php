@@ -179,6 +179,28 @@ function getDriverLicenseValidation() {
 	
 	return $data;
 }
+function getApache2Status(){
+	$data = array("running" => false,"connections" => 0);
+	$curl = curl_init();
+	$optArray = array(
+		CURLOPT_URL => 'http://core.sharengo.it/server-status?auto',
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_HEADER => true
+	);
+	curl_setopt_array($curl, $optArray);
+	$response = curl_exec($curl);
+	$response = str_replace("\r","",$response);
+	$response = explode("\n",$response);
+	for($x=0;$x<count($response);$x++){
+		if (strpos($response[$x], 'BusyWorkers: ') !== false) {
+			$data['connections'] = str_replace("BusyWorkers: ","",$response[$x]);
+		}
+	}
+	curl_close($curl);
+	$status = checkProcess('apache2');
+	$data['running'] = $status['running'];
+	return $data;
+}
 
 function checkProcess($process) {
     exec("/bin/pidof \"$process\"",$response);
@@ -285,6 +307,7 @@ if ($cache!=NULL) {
   $result->pm2 = checkProcess('PM2 v1.1.2: God Daemon');
   $result->pm2['jobs']=getPM2info();
   $result->dlv=getDriverLicenseValidation();
+  $result->apache=getApache2Status();
   
 
   $dbh = getDb();
