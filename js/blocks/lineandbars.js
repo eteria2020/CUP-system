@@ -17,7 +17,8 @@ $(function () {
   
   $(document).ready(function() {
 
-    chart = new Highcharts.Chart({
+    /*
+	chart = new Highcharts.Chart({
       chart: {
         renderTo: 'importantchart',
         type: 'column',
@@ -96,6 +97,7 @@ $(function () {
       });
 
     }, 3000);
+	*/
   });
   
 });
