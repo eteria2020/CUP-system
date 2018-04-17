@@ -107,7 +107,7 @@
         //updtePieCars([]);
 
         update();
-        setInterval(update,60000);
+        setInterval(update,300000);
     });
 
     function setLed(id,state) {
@@ -426,7 +426,7 @@
                   <tr><td style="padding: 10px"><div id="ledMongo" class="led-gray"></div></td><td>MongoDB   (<span id='pidsMongo' style="color:#3FCCCC;">-</span>)</td></tr>
                   <tr><td style="padding: 10px"><div id="ledRedisServer" class="led-gray"></div></td><td>Redis-Server</td></tr>
                   <tr><td style="padding: 10px"><div id="ledRedisSentinel" class="led-gray"></div></td><td>Redis-Sentinel</td></tr>
-                  <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a href="http://core.sharengo.it:9000/">PM2</a></td></tr>
+                  <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a onclick="return confirm('Sei sicuro di voler riavviare le API?')" href="http://core.sharengo.it/system/pm2_restart.php?r=ok">PM2</a></td></tr>
 				  <tr><td style="padding: 10px"><div id="ledDlv" class="led-gray"></div></td><td><a href="http://license.sharengo.it:8080/check_patente.htm">Driver license</a></td></tr>
 				  <tr><td style="padding: 10px"><div id="ledApache2" class="led-gray"></div></td><td><a href="http://core.sharengo.it/server-status">Apache2</a> (<span id='connApache' style="color:#3FCCCC;">-</span>)</td></tr>
                   </table>
