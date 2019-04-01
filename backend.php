@@ -276,6 +276,20 @@ function getCache() {
    }
 }
 
+function getRedisServerDetails(){
+    $redisStatus = shell_exec("redis-cli info");
+    $cmdPerSec = 0; //instantaneous_ops_per_sec
+    $memUsed = 0; //used_memory_human
+    foreach (explode("\n",$redisStatus) as $item) {
+        if(strpos($item,"instantaneous_ops_per_sec")===0){
+            $cmdPerSec=str_replace("instantaneous_ops_per_sec:","",$item);
+        }else if(strpos($item,"used_memory_human")===0){
+            $memUsed=str_replace("used_memory_human:","",$item);
+        }
+    }
+    return "ops/s:".$cmdPerSec;//." mem:".$memUsed;
+}
+
 function updateCache($newCache) {
    global $CACHE_FILE;
    file_put_contents($CACHE_FILE,$newCache);
@@ -308,6 +322,7 @@ if ($cache!=NULL) {
   $result->pm2['jobs']=getPM2info();
   $result->dlv=getDriverLicenseValidation();
   $result->apache=getApache2Status();
+  $result->redis_server_details=getRedisServerDetails();
   
 
   $dbh = getDb();
@@ -326,7 +341,7 @@ if ($cache!=NULL) {
   $result->db->cars_fi = getCarsCount($dbh,2);
   $result->db->cars_rm = getCarsCount($dbh,3);
   $result->db->cars_mo = getCarsCount($dbh,4);
-  $result->db->reservations_count = getReservationsCount($dbh); 
+  $result->db->reservations_count = getReservationsCount($dbh);
 
   //$result->pm2 = getPM2stats();
 

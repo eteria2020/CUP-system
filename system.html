@@ -108,6 +108,7 @@
 
         update();
         setInterval(update,300000);
+		setInterval(updateRedisDetails,5000);
     });
 
     function setLed(id,state) {
@@ -297,7 +298,7 @@
             setLed('#ledMqNotifier',data.pm2.jobs.MqNotifier.status=='online');
 
 			$('#pm2Uptime').text(""+timeConverter(data.pm2.jobs.webservices.pm_uptime));
-			
+			$('#redisServerDetails').text(""+data.redis_server_details);
 			$('#connApache').text(""+data.apache.connections);
 
             $('#pidsPostgres').text(""+data.postgres.pids);
@@ -395,6 +396,15 @@
         })
 
     }
+	function updateRedisDetails() {
+		$.ajax({
+			dataType: "json",
+			url: "http://core.sharengo.it/system/redisDetails.php",
+			success : function(data) {
+				$('#redisServerDetails').text(""+data.ops);
+			}
+		});
+    }
 
 </script>    
   </head>
@@ -439,7 +449,7 @@
                   <tr><td style="padding: 10px"><div id="ledPostgres" class="led-gray"></div></td><td>PostgreSQL  (<span id='pidsPostgres' style="color:#3FCCCC;">-</span>)</td></tr>
                   <tr><td style="padding: 10px"><div id="ledPgpool2" class="led-gray"></div></td><td>PgPool2   (<span id='pidsPgpool2' style="color:#3FCCCC;">-</span>)</td></tr>
                   <tr><td style="padding: 10px"><div id="ledMongo" class="led-gray"></div></td><td>MongoDB   (<span id='pidsMongo' style="color:#3FCCCC;">-</span>)</td></tr>
-                  <tr><td style="padding: 10px"><div id="ledRedisServer" class="led-gray"></div></td><td>Redis-Server</td></tr>
+                  <tr><td style="padding: 10px"><div id="ledRedisServer" class="led-gray"></div></td><td>Redis-Server (<span id='redisServerDetails' style="color:#3FCCCC;">-</span>)</td></tr>
                   <tr><td style="padding: 10px"><div id="ledRedisSentinel" class="led-gray"></div></td><td>Redis-Sentinel</td></tr>
                   <tr><td style="padding: 10px"><div id="ledPm2" class="led-gray"></div></td><td><a onclick="return confirm('Sei sicuro di voler riavviare le API?')" href="http://core.sharengo.it/system/pm2_restart.php?r=ok">PM2</a> (<span id='pm2Uptime' style="color:#3FCCCC;">-</span>)</td></tr>
 				  <tr><td style="padding: 10px"><div id="ledDlv" class="led-gray"></div></td><td><a href="http://license.sharengo.it:8080/check_patente.htm">Driver license</a></td></tr>
